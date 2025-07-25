@@ -1,0 +1,140 @@
+---
+title: "statistical and graphics of suelo" 
+author: "Julieth Vanessa Tovar Torres"
+date: "2022-06-11"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(mice)
+library(graphics)
+library(readxl)
+library(modeest)
+library(lessR)
+library(ggplot2)
+```
+## 1. Introduction and upload of data
+we will upload the data "suelo", the data includes information about the soil and the properties in him\ 
+we also puts the information as data frame.
+```{r}
+suelo <- read_excel("C:/Users/vanes/Desktop/Suelo.xlsx")
+suelo<- as.data.frame(suelo)
+View(suelo)
+attach(suelo)
+```
+## 2.statistical information
+### 2.1 measures of central tendency
+we will see different information about the data like the class and names, also the mode, minimum, maximum, 1st and 3rd quartiles, median and mean of every quantitative characteristics of the soil and the length, class and mode of qualitative characteristics.\ 
+```{r}
+class(suelo)
+names(suelo)
+mfv(Municipio) #mode
+mfv(Cultivo)
+mfv(Topografia)
+mfv(Drenaje)
+mfv(Riego)
+mfv(pH_agua)
+mfv(Materia_orgánica)
+mfv(Azufre)
+mfv(Calcio)
+mfv(Potasio)
+mfv(Sodio)
+mfv(Planos)
+mfv(Tanques)
+summary(suelo)
+```
+
+### 2.2 deviations
+we see different types of quantiles in the calcio area and the interquartile range (distances between second \ and third quartile), a speciffic distance (55%-45%),median and standar deviation, where we can make a \  comparation whit the standar deviation (11.15273) and the aritmetic mean (11.644) to show how dispersed the \  data are. \ 
+
+```{r}
+#desviaciones estandar
+quantile(Calcio) #quartiles
+quantile(Calcio,0.15) #15%
+IQR(Calcio) #interquartile range
+quantile(Calcio,0.55)-quantile(Calcio,0.45)
+mad(Calcio) #median deviation
+sd(Calcio) #standar deviation
+```
+### 2.3 example of decisions based on data analysis
+We will select the 5% of soils exhibiting the lowest calcium concentrations, as these are identified for intervention. Subsequently, we will ascertain the minimum calcium level required for soils to avoid  intervention.
+```{r}
+quantile(Calcio,0.05)
+```
+We can see that the minimum calcium level is 0.55, and soils below this threshold require intervention.
+
+## 3. graphics
+we gonna use different graphics for "calcio" and make the analysis of each one
+
+### 3.1 Stem-and-Leaf Plot
+```{r}
+stem(Calcio)
+```
+The stem-and-leaf plot displays the data distribution, where the decimal point is one digit to the right of the vertical bar. The values range from 0.0 to 4.5. The distribution is notably positively skewed or right-skewed, with most observations concentrated in the 0.0-0.8 and 1.0-1.4 ranges. The median of the data is 0.7, indicating that half of the observations are equal to or less than this value. The total range of the data is 4.5, showing considerable dispersion, especially with some higher values extending beyond the main concentration of data.
+
+### 3.2 box plot
+```{r}
+boxplot(Calcio)
+```
+The box plot says the median (Q2) is approximately 8.5-9, indicating that half of the data points are below this value. The central 50% of the data, represented by the box, spans from approximately 4 (Q1) to 15 (Q3), resulting in an Interquartile Range (IQR) of about 11. The whiskers extend to roughly 0 on the lower end and 28 on the upper end, capturing the majority of the data's spread. Notably, there are several outliers observed above the upper whisker, specifically around 39 and 42, which are significantly higher values compared to the rest of the dataset. The box plot suggests a right-skewed (positively skewed) distribution, as the median is closer to the bottom of the box, and the upper whisker is longer with outliers extending to higher values, indicating a longer tail on the right side.\ 
+
+### 3.3 histogram
+```{r}
+hist(Calcio, main = "variable calcio histogram",
+     xlab = "quantity calcio", ylab = "quantity crops",
+     col = c("violetred","whitesmoke","purple","tan","seagreen","blue2",
+             "red","orchid","papayawhip"))
+```
+This histogram displays the distribution of 'calcium quantity' in crops. It is clear that the distribution is positively skewed (right-skewed), indicating that the majority of crops exhibit low calcium levels. The largest number of crops, approximately 16-17, are concentrated in the first calcium interval (close to 0-5 units). There is a secondary frequency peak around 10-15 units of calcium. The frequency of crops decreases considerably as calcium levels increase, although there is a small group of crops with higher levels, approximately between 35 and 40 units of calcium. The overall range of calcium quantity observed in the crops extends from nearly 0 to approximately 40-45 units.
+
+### 3.4 histogram topografia
+```{r}
+tabla1<-table(Topografia)
+tabla1
+
+barplot(tabla1,main = "histogram topografia",
+        xlab = "type topography", ylab = "quantity crops",
+        col = c ("pink","blue","violet","white","red")) 
+```
+This bar plot illustrates the distribution of crops across different topography types. The 'Ondulado' (Undulating) terrain accounts for the largest number of crops, with approximately 16 instances. 'Plano' (Flat) terrain is the second most common, hosting about 15 crops, closely followed by 'Pendiente' (Sloping) terrain with approximately 14 crops. Conversely, crops with 'No indica' (Not indicated) topography are extremely rare, with only about 1 instance. There is also a bar corresponding to an unlabeled category, showing a very low frequency of around 2 crops. Overall, the data indicates that crops are predominantly found in undulating, flat, and sloping topographies, with very few instances where topography is not specified.
+
+### 3.5 Pie Chart
+```{r}
+tabla2<- prop.table(tabla1)
+tabla2
+tabla2<- as.data.frame(tabla2)
+
+per <- round(tabla2$Freq * 100, 1)
+tags <- paste0(tabla2$Topografia, " (", per, "%)")
+pie(tabla2$Freq, labels = tags, main = "Proportion according to the type of topography")
+```
+The pie chart clearly shows that the dataset is primarily concentrated in sloping, flat, and undulating topographies, which together account for 92% of the total. The remaining 8% is distributed among moderately sloping, unspecified, and mixed flat/undulating terrains. This visualization provides a quick and clear understanding of the relative frequency of each topography type within the dataset.
+
+### 3.6 histogram whit mode, mean and median
+```{r}
+qplot(Calcio, bins=4,geom = "histogram", color="pink")+
+  geom_vline(xintercept = mean(Calcio),color= "red")+ 
+  geom_vline(xintercept = median(Calcio),color= "blue")+
+  geom_vline(xintercept = mfv(Calcio),color= "black")
+
+```
+This histogram illustrates the positively skewed distribution of calcium levels, with the majority of observations concentrated at lower values, evidenced by the tallest bar on the left and the mode (black line) positioned near zero. While the median (blue line) is slightly higher, at approximately 0.7 (as confirmed by the stem-and-leaf plot), the mean (red line) is pulled significantly higher, around 13-15, due to the presence of a few higher calcium levels, characteristic of a right-skewed distribution where Mode < Median < Mean.
+
+### 3.7 Stacked histogram
+```{r}
+
+qplot(Calcio, bins=4, geom="histogram",
+      fill=as.factor(Tanques),
+      xlab="quantity calcio", ylab="number of crops",
+      main="quantity of Calcium content of crops and number of tanks") +
+  labs(fill="Tanques")
+```
+This stacked histogram illustrates the right-skewed distribution of calcium content in crops, with the majority falling into lower ranges, while simultaneously breaking down these frequencies by the number of associated tanks. Crops with 0 tanks (red) are the most numerous across all calcium levels, particularly dominating the lower to moderate ranges, whereas crops with 3 (blue) and 4 (purple) tanks are primarily concentrated at very low calcium levels, demonstrating distinct patterns of tank usage across the calcium spectrum.
+
+
